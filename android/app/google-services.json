@@ -1,0 +1,90 @@
+{
+  "project_info": {
+    "project_number": "453576168633",
+    "project_id": "zomato-4838f",
+    "storage_bucket": "zomato-4838f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:453576168633:android:b454cfade532eed04b3768",
+        "android_client_info": {
+          "package_name": "com.example.zomato_restaurant"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "453576168633-rt1h58bktuicch0sb7uhpo8koq7hmgqg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCoRthetpEustTwj1me0MkrL5KwUKZG4Io"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "453576168633-rt1h58bktuicch0sb7uhpo8koq7hmgqg.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "453576168633-lscjcq02hmllngvhdmp75np710s8iqtn.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.zomatoUser"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:453576168633:android:297fc89f24efd5b44b3768",
+        "android_client_info": {
+          "package_name": "com.example.zomato_user"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "453576168633-n1hem9i2bh4k3vv6hs4ud58ni875uhij.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.zomato_user",
+            "certificate_hash": "0792d909c1da11b01c079d97e640bb4165d7ee81"
+          }
+        },
+        {
+          "client_id": "453576168633-rt1h58bktuicch0sb7uhpo8koq7hmgqg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCoRthetpEustTwj1me0MkrL5KwUKZG4Io"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "453576168633-rt1h58bktuicch0sb7uhpo8koq7hmgqg.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "453576168633-lscjcq02hmllngvhdmp75np710s8iqtn.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.zomatoUser"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
