@@ -42,6 +42,8 @@ class _RegistrationState extends State<Registration> {
         });
   }
 
+  final List<String> foodSelection = ["Chechen", "Matan", "Anda"];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

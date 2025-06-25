@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -23,14 +24,36 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("HomePage"), centerTitle: true),
-      body: Center(
-        child: ElevatedButton(
-          onPressed: () {
-            signOut();
-          },
-          child: Text("SignOut"),
-        ),
+      appBar: AppBar(
+        actions: [
+          Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: IconButton(
+              onPressed: () {
+                signOut();
+              },
+              icon: Icon(Icons.logout),
+            ),
+          ),
+        ],
+        title: Text("Restaurant Side"),
+        centerTitle: true,
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              itemCount: 5,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text("data"),
+                  subtitle: Text("data1"),
+                  trailing: Text("data"),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
