@@ -1,5 +1,10 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart' as firebase_core;
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:zomato_restaurant/auth/sing_in.dart';
 import 'package:firebase_core/firebase_core.dart';
 
@@ -42,7 +47,7 @@ class _RegistrationState extends State<Registration> {
         });
   }
 
-  final List<String> foodSelection = ["Chechen", "Matan", "Anda"];
+  uploadFile() async {}
 
   @override
   Widget build(BuildContext context) {
@@ -88,6 +93,12 @@ class _RegistrationState extends State<Registration> {
                   borderRadius: BorderRadius.circular(25),
                 ),
               ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                uploadFile();
+              },
+              child: Text("Select File Image"),
             ),
             ElevatedButton(
               onPressed: () {

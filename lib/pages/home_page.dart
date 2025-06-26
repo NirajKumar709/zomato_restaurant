@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:zomato_restaurant/pages/delivery_patner.dart';
+import 'package:zomato_restaurant/pages/profile_page.dart';
 
 import '../auth/sing_in.dart';
 
@@ -39,19 +41,33 @@ class _HomePageState extends State<HomePage> {
         title: Text("Restaurant Side"),
         centerTitle: true,
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              itemCount: 5,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text("data"),
-                  subtitle: Text("data1"),
-                  trailing: Text("data"),
+      body: Column(children: [Text("data")]),
+      bottomNavigationBar: BottomNavigationBar(
+        items: [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+          BottomNavigationBarItem(
+            icon: InkWell(
+              child: Icon(Icons.delivery_dining),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => DeliveryPatner()),
                 );
               },
             ),
+            label: "Delivery Partner",
+          ),
+          BottomNavigationBarItem(
+            icon: InkWell(
+              child: Icon(Icons.person),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ProfilePage()),
+                );
+              },
+            ),
+            label: "Profile",
           ),
         ],
       ),
