@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
 String globalDocId = "";
+String imageURL = "";
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

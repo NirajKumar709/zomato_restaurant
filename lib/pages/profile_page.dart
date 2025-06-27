@@ -49,14 +49,32 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Profile Update"), centerTitle: true),
+      appBar: AppBar(
+        title: Row(
+          spacing: 10,
+          children: [
+            CircleAvatar(radius: 15, backgroundImage: NetworkImage(imageURL)),
+            Text("Profile Update"),
+          ],
+        ),
+        centerTitle: true,
+      ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ListTile(
             title:
                 dataStore.isNotEmpty
-                    ? Text(dataStore["ownerName"] + " Profile Edit")
+                    ? Row(
+                      spacing: 5,
+                      children: [
+                        CircleAvatar(
+                          radius: 25,
+                          backgroundImage: NetworkImage(imageURL),
+                        ),
+                        Text(dataStore["ownerName"] + " Profile Edit"),
+                      ],
+                    )
                     : Center(child: CircularProgressIndicator()),
             trailing: PopupMenuButton(
               itemBuilder: (context) {
@@ -133,19 +151,28 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
           Padding(
             padding: const EdgeInsets.all(15.0),
-            child:
-                dataStore.isNotEmpty
-                    ? Column(
-                      children: [
-                        Text(
-                          "Restaurant Owner Name: " + dataStore["ownerName"],
+            child: Card(
+              child:
+                  dataStore.isNotEmpty
+                      ? ListTile(
+                        title: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text("Owner Name: " + dataStore["ownerName"]),
+                            Text(
+                              "Restaurant Name: " + dataStore["restaurantName"],
+                            ),
+                            Text("Address: " + dataStore["address"]),
+                          ],
                         ),
-                        Text("Restaurant Name: " + dataStore["restaurantName"]),
-                        Text("Restaurant Address: " + dataStore["address"]),
-                        Text("Restaurant Food Type: " + dataStore["foodType"]),
-                      ],
-                    )
-                    : Center(child: CircularProgressIndicator()),
+                        trailing: Text(dataStore["foodType"]),
+                        leading: CircleAvatar(
+                          radius: 15,
+                          backgroundImage: NetworkImage(imageURL),
+                        ),
+                      )
+                      : Center(child: CircularProgressIndicator()),
+            ),
           ),
         ],
       ),

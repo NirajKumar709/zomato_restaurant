@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:zomato_restaurant/auth/sign_up.dart';
@@ -22,8 +23,23 @@ class _SingInState extends State<SingIn> {
     try {
       final credential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password)
-          .then((value) {
+          .then((value) async {
             globalDocId = value.user!.uid;
+
+            FirebaseFirestore firestore = FirebaseFirestore.instance;
+            DocumentSnapshot snapshot =
+                await firestore
+                    .collection("restaurant")
+                    .doc(value.user!.uid)
+                    .get();
+
+            Map<String, dynamic> finalData =
+                snapshot.data() as Map<String, dynamic>;
+
+            imageURL = finalData["imageURL"];
+            print(finalData);
+            print(finalData["imageURL"]);
+            print("_____________________________________");
 
             Navigator.pushReplacement(
               context,
