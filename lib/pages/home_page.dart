@@ -35,7 +35,7 @@ class _HomePageState extends State<HomePage> {
 
   Map<String, dynamic> dataStore = {};
 
-  getAppBarData() async {
+  Stream<Map<String, dynamic>> getAppBarData() async* {
     FirebaseFirestore firestore = FirebaseFirestore.instance;
     DocumentSnapshot snapshot =
         await firestore.collection("restaurant").doc(globalDocId).get();
@@ -43,6 +43,8 @@ class _HomePageState extends State<HomePage> {
     Map<String, dynamic> finalData = snapshot.data() as Map<String, dynamic>;
 
     dataStore = finalData;
+
+    setState(() {});
   }
 
   @override
@@ -66,19 +68,29 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
         ],
-        title:
-            dataStore.isNotEmpty
+        title: StreamBuilder<Map<String, dynamic>>(
+          stream: getAppBarData(),
+          builder: (context, snapshot) {
+            return dataStore.isNotEmpty
                 ? Row(
-                  spacing: 10,
+                  spacing: 5,
                   children: [
                     CircleAvatar(
                       radius: 18,
                       backgroundImage: NetworkImage(dataStore["imageURL"]),
                     ),
-                    Text(dataStore["restaurantName"]),
+                    Expanded(
+                      child: Text(
+                        dataStore["restaurantName"],
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
                   ],
                 )
-                : Center(child: CircularProgressIndicator()),
+                : Center(child: CircularProgressIndicator());
+          },
+        ),
+
         centerTitle: true,
       ),
       body: Column(children: [Text("data")]),

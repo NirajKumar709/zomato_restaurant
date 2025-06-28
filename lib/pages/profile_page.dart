@@ -1,6 +1,11 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:zomato_restaurant/main.dart';
+import 'package:zomato_restaurant/pages/home_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -46,6 +51,63 @@ class _ProfilePageState extends State<ProfilePage> {
     getRestaurantUser();
   }
 
+  String imageURLStore = "";
+
+  uploadImage() async {
+    // from image picker package
+    final ImagePicker picker = ImagePicker();
+    final img = await picker.pickImage(source: ImageSource.gallery);
+
+    if (img == null) {
+      Navigator.pop(context);
+    } else {
+      File file = File(img.path);
+
+      // from firebase Storage image
+      final storageRef = FirebaseStorage.instance.ref();
+      final imageRef = storageRef.child(
+        "images/${DateTime.now().millisecondsSinceEpoch}.jpg",
+      );
+
+      try {
+        imageRef.putFile(file).then((p0) async {
+          final newImageURL = imageRef.getDownloadURL();
+
+          imageURLStore = await newImageURL;
+
+          Future.delayed(Duration(seconds: 1), () {
+            updateImage();
+          });
+        });
+      } catch (e) {
+        print(e);
+      }
+    }
+  }
+
+  updateImage() {
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
+    firestore
+        .collection("restaurant")
+        .doc(globalDocId)
+        .update({"imageURL": imageURLStore})
+        .then((value) async {
+          getData();
+        });
+  }
+
+  getData() async {
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
+    DocumentSnapshot snapshot =
+        await firestore.collection("restaurant").doc(globalDocId).get();
+
+    Map<String, dynamic> finalData = snapshot.data() as Map<String, dynamic>;
+
+    imageURL = finalData["imageURL"];
+
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -66,13 +128,39 @@ class _ProfilePageState extends State<ProfilePage> {
             title:
                 dataStore.isNotEmpty
                     ? Row(
-                      spacing: 5,
+                      spacing: 10,
                       children: [
-                        CircleAvatar(
-                          radius: 25,
-                          backgroundImage: NetworkImage(imageURL),
+                        Stack(
+                          children: [
+                            CircleAvatar(
+                              radius: 25,
+                              backgroundImage: NetworkImage(imageURL),
+                            ),
+
+                            Positioned(
+                              bottom: 0,
+                              right: 0,
+                              child: Container(
+                                padding: EdgeInsets.all(2),
+                                decoration: BoxDecoration(
+                                  color: Colors.blue,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: InkWell(
+                                  onTap: () {
+                                    uploadImage();
+                                  },
+                                  child: Icon(
+                                    Icons.add,
+                                    color: Colors.white,
+                                    size: 25,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                        Text(dataStore["ownerName"] + " Profile Edit"),
+                        Text(dataStore["ownerName"] + "Profile"),
                       ],
                     )
                     : Center(child: CircularProgressIndicator()),
@@ -158,16 +246,14 @@ class _ProfilePageState extends State<ProfilePage> {
                         title: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text("Owner Name: " + dataStore["ownerName"]),
-                            Text(
-                              "Restaurant Name: " + dataStore["restaurantName"],
-                            ),
+                            Text("Owner: " + dataStore["ownerName"]),
+                            Text("Restaurant: " + dataStore["restaurantName"]),
                             Text("Address: " + dataStore["address"]),
                           ],
                         ),
                         trailing: Text(dataStore["foodType"]),
                         leading: CircleAvatar(
-                          radius: 15,
+                          radius: 20,
                           backgroundImage: NetworkImage(imageURL),
                         ),
                       )
