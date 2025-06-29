@@ -57,34 +57,41 @@ class _RegistrationState extends State<Registration> {
     // from image_picker Library
     final picker = ImagePicker();
     final pickFile = await picker.pickImage(source: ImageSource.gallery);
-    File file = File(pickFile!.path);
 
-    // FirebaseStorage reference create
-    final storageRef = FirebaseStorage.instance.ref();
+    if (pickFile == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Please Select Image")));
+    } else {
+      File file = File(pickFile.path);
 
-    // reference file path
-    final imageRef = storageRef.child(
-      "images/${DateTime.now().millisecondsSinceEpoch}.jpg",
-    );
+      // FirebaseStorage reference create
+      final storageRef = FirebaseStorage.instance.ref();
 
-    try {
-      // upload the file
-      await imageRef.putFile(file).then((p0) async {
-        // Get the download URL
-        String downloadURL = await imageRef.getDownloadURL();
+      // reference file path
+      final imageRef = storageRef.child(
+        "images/${DateTime.now().millisecondsSinceEpoch}.jpg",
+      );
 
-        imagePath = downloadURL;
+      try {
+        // upload the file
+        await imageRef.putFile(file).then((p0) async {
+          // Get the download URL
+          String downloadURL = await imageRef.getDownloadURL();
 
-        print(downloadURL);
-        print("_____________________________________");
+          imagePath = downloadURL;
 
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text("Image uploaded successfully")));
-      });
-      print("File uploaded successfully");
-    } on FirebaseException catch (e) {
-      print("Upload failed: $e");
+          print(downloadURL);
+          print("_____________________________________");
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Image uploaded successfully")),
+          );
+        });
+        print("File uploaded successfully");
+      } on FirebaseException catch (e) {
+        print("Upload failed: $e");
+      }
     }
   }
 
