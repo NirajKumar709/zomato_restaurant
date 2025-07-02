@@ -48,6 +48,12 @@ class _DeliveryPatnerState extends State<DeliveryPatner> {
                             title: Text(finalData["name"]),
                             subtitle: Text(finalData["phone_number"]),
                             trailing: Text(finalData["address"]),
+                            leading: CircleAvatar(
+                              radius: 25,
+                              backgroundImage: NetworkImage(
+                                finalData["imageURL"],
+                              ),
+                            ),
                           ),
                         );
                       },
