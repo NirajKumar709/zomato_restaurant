@@ -22,12 +22,11 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   signOut() async {
-    await FirebaseAuth.instance.signOut().then((value) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => SingIn()),
-      );
-    });
+    await FirebaseAuth.instance.signOut();
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => SingIn()),
+    );
   }
 
   @override
@@ -40,16 +39,22 @@ class _HomePageState extends State<HomePage> {
 
   Map<String, dynamic> dataStore = {};
 
-  Stream<Map<String, dynamic>> getAppBarData() async* {
+  Future<void> getAppBarData() async {
     FirebaseFirestore firestore = FirebaseFirestore.instance;
-    DocumentSnapshot snapshot =
-        await firestore.collection("restaurant").doc(globalDocId).get();
+    DocumentSnapshot snapshot = await firestore
+        .collection("restaurant")
+        .doc(globalDocId)
+        .get()
+        .then((value) {
+          setState(() {});
+          return value;
+        });
 
     Map<String, dynamic> finalData = snapshot.data() as Map<String, dynamic>;
 
     dataStore = finalData;
 
-    setState(() {});
+    return;
   }
 
   TextEditingController foodName = TextEditingController();
@@ -129,6 +134,8 @@ class _HomePageState extends State<HomePage> {
         .collection("restaurant_items")
         .doc(id)
         .delete();
+
+    setState(() {});
   }
 
   @override
@@ -146,26 +153,29 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
         ],
-        title: StreamBuilder<Map<String, dynamic>>(
-          stream: getAppBarData(),
+        title: FutureBuilder(
+          future: getAppBarData(),
           builder: (context, snapshot) {
-            return dataStore.isNotEmpty
-                ? Row(
-                  spacing: 5,
-                  children: [
-                    CircleAvatar(
+            return Row(
+              spacing: 10,
+              children: [
+                dataStore.isNotEmpty
+                    ? CircleAvatar(
                       radius: 18,
                       backgroundImage: NetworkImage(dataStore["imageURL"]),
-                    ),
-                    Expanded(
+                    )
+                    : Center(child: CircularProgressIndicator()),
+
+                dataStore.isNotEmpty
+                    ? Expanded(
                       child: Text(
                         dataStore["restaurantName"],
                         overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                  ],
-                )
-                : Center(child: CircularProgressIndicator());
+                    )
+                    : Center(child: CircularProgressIndicator()),
+              ],
+            );
           },
         ),
 
@@ -271,10 +281,18 @@ class _HomePageState extends State<HomePage> {
           ),
           BottomNavigationBarItem(
             icon: InkWell(
-              child: CircleAvatar(
-                radius: 15,
-                backgroundImage: NetworkImage(imageURL),
+              child: FutureBuilder(
+                future: getAppBarData(),
+                builder: (context, snapshot) {
+                  return dataStore.isNotEmpty
+                      ? CircleAvatar(
+                        radius: 15,
+                        backgroundImage: NetworkImage(dataStore["imageURL"]),
+                      )
+                      : Center(child: CircularProgressIndicator());
+                },
               ),
+
               // Icon(Icons.person),
               onTap: () {
                 Navigator.push(
