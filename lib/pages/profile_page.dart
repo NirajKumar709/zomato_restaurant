@@ -27,7 +27,7 @@ class _ProfilePageState extends State<ProfilePage> {
   getRestaurantUser() async {
     FirebaseFirestore firestore = FirebaseFirestore.instance;
     DocumentSnapshot snapshot =
-        await firestore.collection("restaurant").doc(globalDocId).get();
+        await firestore.collection("restaurant_profile").doc(globalDocId).get();
 
     dataStore = snapshot.data() as Map<String, dynamic>;
 
@@ -66,7 +66,7 @@ class _ProfilePageState extends State<ProfilePage> {
       // from firebase Storage image
       final storageRef = FirebaseStorage.instance.ref();
       final imageRef = storageRef.child(
-        "images/${DateTime.now().millisecondsSinceEpoch}.jpg",
+        "restaurant/${DateTime.now().millisecondsSinceEpoch}.jpg",
       );
 
       try {
@@ -115,7 +115,7 @@ class _ProfilePageState extends State<ProfilePage> {
         title: Row(
           spacing: 10,
           children: [
-            CircleAvatar(radius: 15, backgroundImage: NetworkImage(imageURL)),
+            CircleAvatar(radius: 15, backgroundImage: NetworkImage("imageURL")),
             Text("Profile Update"),
           ],
         ),
@@ -132,10 +132,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       children: [
                         Stack(
                           children: [
-                            CircleAvatar(
-                              radius: 25,
-                              backgroundImage: NetworkImage(imageURL),
-                            ),
+                            CircleAvatar(radius: 25),
 
                             Positioned(
                               bottom: 0,
@@ -160,7 +157,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                           ],
                         ),
-                        Text(dataStore["ownerName"] + "Profile"),
+                        Text(dataStore["restaurantName"] + "Profile"),
                       ],
                     )
                     : Center(child: CircularProgressIndicator()),
@@ -246,16 +243,12 @@ class _ProfilePageState extends State<ProfilePage> {
                         title: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text("Owner: " + dataStore["ownerName"]),
                             Text("Restaurant: " + dataStore["restaurantName"]),
                             Text("Address: " + dataStore["address"]),
                           ],
                         ),
                         trailing: Text(dataStore["foodType"]),
-                        leading: CircleAvatar(
-                          radius: 20,
-                          backgroundImage: NetworkImage(imageURL),
-                        ),
+                        leading: CircleAvatar(radius: 20),
                       )
                       : Center(child: CircularProgressIndicator()),
             ),

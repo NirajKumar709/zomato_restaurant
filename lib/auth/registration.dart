@@ -4,7 +4,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_firestore/cloud_firestore.dart' as firebase_core;
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:location/location.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zomato_restaurant/auth/sing_in.dart';
@@ -21,29 +23,28 @@ class Registration extends StatefulWidget {
 }
 
 class _RegistrationState extends State<Registration> {
-  TextEditingController nameController = TextEditingController();
   TextEditingController restaurantName = TextEditingController();
   TextEditingController address = TextEditingController();
   TextEditingController foodType = TextEditingController();
-
-  String imagePath = "";
+  TextEditingController phoneNumber = TextEditingController();
 
   registrationDataStore({
-    required String name,
-    required String resName,
+    required String restaurantName,
     required String address,
-    required String food,
+    required String phoneNumber,
   }) {
     FirebaseFirestore firestore = FirebaseFirestore.instance;
     firestore
-        .collection("restaurant")
+        .collection("restaurant_profile")
         .doc(widget.docId)
         .set({
-          "ownerName": name,
-          "restaurantName": resName,
+          "restaurantName": restaurantName,
           "address": address,
-          "foodType": food,
-          "imageURL": imagePath,
+          "phoneNumber": phoneNumber,
+          "foodType": selectedFood,
+          "imageURL": restaurantImageURL,
+          "restaurantId": widget.docId,
+          "locations": latitudeLongitude,
         })
         .then((value) {
           Navigator.pushReplacement(
@@ -53,47 +54,53 @@ class _RegistrationState extends State<Registration> {
         });
   }
 
-  uploadFile() async {
-    // from image_picker Library
-    final picker = ImagePicker();
-    final pickFile = await picker.pickImage(source: ImageSource.gallery);
+  List<File> selectedImage = [];
 
-    if (pickFile == null) {
+  selectImage() async {
+    // from image_picker Library
+    final picker = ImagePicker().pickMultiImage();
+    List<XFile> imagePick = await picker;
+
+    if (imagePick.isNotEmpty) {
+      for (var i = 0; i < imagePick.length; i++) {
+        selectedImage.add(File(imagePick[i].path));
+
+        print(selectedImage);
+        print("________________________________________");
+      }
+    } else {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text("Please Select Image")));
-    } else {
-      File file = File(pickFile.path);
+      ).showSnackBar(SnackBar(content: Text("Nothing is selected")));
+    }
+    setState(() {});
+  }
 
-      // FirebaseStorage reference create
-      final storageRef = FirebaseStorage.instance.ref();
+  List<String> restaurantImageURL = [];
 
-      // reference file path
-      final imageRef = storageRef.child(
-        "images/${DateTime.now().millisecondsSinceEpoch}.jpg",
+  storeImage() async {
+    for (int j = 0; j < selectedImage.length; j++) {
+      final storageRef = FirebaseStorage.instance.ref().child(
+        "restaurant_profile/${widget.docId}${DateTime.now().millisecondsSinceEpoch}.jpg",
       );
 
       try {
-        // upload the file
-        await imageRef.putFile(file).then((p0) async {
-          // Get the download URL
-          String downloadURL = await imageRef.getDownloadURL();
+        await storageRef.putFile(selectedImage[j]);
+        final resImageUrl = storageRef.getDownloadURL();
 
-          imagePath = downloadURL;
+        restaurantImageURL.add(await resImageUrl);
 
-          print(downloadURL);
-          print("_____________________________________");
-
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Image uploaded successfully")),
-          );
-        });
-        print("File uploaded successfully");
-      } on FirebaseException catch (e) {
-        print("Upload failed: $e");
+        print(restaurantImageURL.length);
+        print("___________________________________________");
+        print(resImageUrl);
+      } catch (e) {
+        print(e);
       }
     }
   }
+
+  List<String> foodSelect = ["Veg", "Non-Veg"];
+  String? selectedFood;
 
   @override
   Widget build(BuildContext context) {
@@ -101,65 +108,108 @@ class _RegistrationState extends State<Registration> {
       appBar: AppBar(title: Text("Registration"), centerTitle: true),
       body: Padding(
         padding: const EdgeInsets.all(10.0),
-        child: SingleChildScrollView(
-          child: Column(
-            spacing: 15,
-            children: [
-              TextFormField(
-                controller: nameController,
-                decoration: InputDecoration(
-                  hintText: "Enter Name",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(25),
-                  ),
+        child: Column(
+          spacing: 15,
+          children: [
+            TextFormField(
+              controller: restaurantName,
+              decoration: InputDecoration(
+                hintText: "Enter Restaurant Name",
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(25),
                 ),
               ),
-              TextFormField(
-                controller: restaurantName,
-                decoration: InputDecoration(
-                  hintText: "Enter Restaurant Name",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(25),
-                  ),
+            ),
+            TextFormField(
+              controller: address,
+              decoration: InputDecoration(
+                hintText: "Address",
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(25),
                 ),
               ),
-              TextFormField(
-                controller: address,
-                decoration: InputDecoration(
-                  hintText: "Address",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(25),
-                  ),
+            ),
+            TextFormField(
+              keyboardType: TextInputType.number,
+              controller: phoneNumber,
+              decoration: InputDecoration(
+                hintText: "Phone Number",
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(25),
                 ),
               ),
-              TextFormField(
-                controller: foodType,
-                decoration: InputDecoration(
-                  hintText: "Food type",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                ),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  uploadFile();
-                },
-                child: Text("Select File Image"),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  registrationDataStore(
-                    name: nameController.text,
-                    resName: restaurantName.text,
-                    address: address.text,
-                    food: foodType.text,
-                  );
-                },
-                child: Text("Register Now"),
-              ),
-            ],
-          ),
+            ),
+            DropdownButton(
+              hint: Text('Select food type'),
+              value: selectedFood,
+              items:
+                  foodSelect.map((String item) {
+                    return DropdownMenuItem(value: item, child: Text(item));
+                  }).toList(),
+              onChanged: (String? newValue) {
+                setState(() {
+                  selectedFood = newValue!;
+                });
+              },
+            ),
+            ElevatedButton(
+              onPressed: () {
+                selectImage();
+              },
+              child: Text("Upload photo"),
+            ),
+            Expanded(
+              child:
+                  selectedImage.isEmpty
+                      ? Center(child: Text("Sorry nothing selected!!"))
+                      : ListView.builder(
+                        itemCount: selectedImage.length,
+                        itemBuilder: (context, index) {
+                          return ListTile(
+                            title: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Image.file(
+                                  selectedImage[index],
+                                  width: 200,
+                                  height: 200,
+                                ),
+                                Positioned(
+                                  top: 25,
+                                  right: 45,
+                                  child: IconButton(
+                                    color: Colors.white,
+                                    icon: Icon(Icons.close, size: 30),
+                                    onPressed: () {
+                                      selectedImage.removeAt(index);
+
+                                      setState(() {});
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                await storeImage();
+                await registrationDataStore(
+                  restaurantName: restaurantName.text,
+                  address: address.text,
+                  phoneNumber: phoneNumber.text,
+                );
+                restaurantName.clear();
+                address.clear();
+                phoneNumber.clear();
+                selectedImage.clear();
+                foodSelect.clear();
+              },
+              child: Text("Register Now"),
+            ),
+          ],
         ),
       ),
     );

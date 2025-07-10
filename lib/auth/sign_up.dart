@@ -22,7 +22,7 @@ class _SignUpState extends State<SignUp> {
       final credential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password)
           .then((value) {
-            Navigator.push(
+            Navigator.pushReplacement(
               context,
               MaterialPageRoute(
                 builder: (context) => Registration(docId: value.user!.uid),

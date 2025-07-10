@@ -29,14 +29,15 @@ class _SingInState extends State<SingIn> {
             FirebaseFirestore firestore = FirebaseFirestore.instance;
             DocumentSnapshot snapshot =
                 await firestore
-                    .collection("restaurant")
+                    .collection("restaurant_profile")
                     .doc(value.user!.uid)
                     .get();
 
             Map<String, dynamic> finalData =
                 snapshot.data() as Map<String, dynamic>;
 
-            imageURL = finalData["imageURL"];
+            imageURL = List<String>.from(finalData["imageURL"]);
+
             print(finalData);
             print(finalData["imageURL"]);
             print("_____________________________________");

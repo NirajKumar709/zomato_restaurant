@@ -42,7 +42,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> getAppBarData() async {
     FirebaseFirestore firestore = FirebaseFirestore.instance;
     DocumentSnapshot snapshot = await firestore
-        .collection("restaurant")
+        .collection("restaurant_profile")
         .doc(globalDocId)
         .get()
         .then((value) {
@@ -66,19 +66,22 @@ class _HomePageState extends State<HomePage> {
     FirebaseFirestore firestore = FirebaseFirestore.instance;
     final childFire =
         firestore
-            .collection("restaurant")
+            .collection("many_restaurant_item")
             .doc(globalDocId)
             .collection("restaurant_items")
             .doc();
 
     docId = childFire.id;
 
-    final docFire = childFire.set({
-      "foodName": foodName,
-      "foodPrice": foodPrice,
-      "imageURL": itemsUrl,
-      "docId": docId,
-    }, SetOptions(merge: true));
+    final docFire = childFire.set(
+      {
+        "foodName": foodName,
+        "foodPrice": foodPrice,
+        "imageURL": itemsUrl,
+        "docId": docId,
+      },
+      // SetOptions(merge: true),
+    );
   }
 
   List<DocumentSnapshot> dataGet = [];
@@ -87,7 +90,7 @@ class _HomePageState extends State<HomePage> {
     FirebaseFirestore firestore = FirebaseFirestore.instance;
     QuerySnapshot snapshot =
         await firestore
-            .collection("restaurant")
+            .collection("many_restaurant_item")
             .doc(globalDocId)
             .collection("restaurant_items")
             .get();
@@ -112,7 +115,7 @@ class _HomePageState extends State<HomePage> {
 
       final storageRef = FirebaseStorage.instance.ref();
       final childRef = storageRef.child(
-        "Restaurant_items/$globalDocId${DateTime.now().millisecondsSinceEpoch}.jpg",
+        "restaurant_items/$globalDocId${DateTime.now().millisecondsSinceEpoch}.jpg",
       );
 
       await childRef.putFile(file).then((value) {
@@ -129,7 +132,7 @@ class _HomePageState extends State<HomePage> {
   deleteItem({required String id}) {
     FirebaseFirestore firestore = FirebaseFirestore.instance;
     firestore
-        .collection("restaurant")
+        .collection("many_restaurant_item")
         .doc(globalDocId)
         .collection("restaurant_items")
         .doc(id)
@@ -160,10 +163,7 @@ class _HomePageState extends State<HomePage> {
               spacing: 10,
               children: [
                 dataStore.isNotEmpty
-                    ? CircleAvatar(
-                      radius: 18,
-                      backgroundImage: NetworkImage(dataStore["imageURL"]),
-                    )
+                    ? CircleAvatar(radius: 18)
                     : Center(child: CircularProgressIndicator()),
 
                 dataStore.isNotEmpty
@@ -285,14 +285,10 @@ class _HomePageState extends State<HomePage> {
                 future: getAppBarData(),
                 builder: (context, snapshot) {
                   return dataStore.isNotEmpty
-                      ? CircleAvatar(
-                        radius: 15,
-                        backgroundImage: NetworkImage(dataStore["imageURL"]),
-                      )
+                      ? CircleAvatar(radius: 15)
                       : Center(child: CircularProgressIndicator());
                 },
               ),
-
               // Icon(Icons.person),
               onTap: () {
                 Navigator.push(
