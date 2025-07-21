@@ -31,7 +31,6 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    // TODO: implement initState
     getAppBarData();
     getItems();
     super.initState();
@@ -77,7 +76,7 @@ class _HomePageState extends State<HomePage> {
       {
         "foodName": foodName,
         "foodPrice": foodPrice,
-        "imageURL": itemsUrl,
+        "imageURL": foodImageURL,
         "docId": docId,
       },
       // SetOptions(merge: true),
@@ -100,32 +99,45 @@ class _HomePageState extends State<HomePage> {
     setState(() {});
   }
 
-  String itemsUrl = "";
+  File? selectedImage;
 
   imageItems() async {
-    final ImagePicker picker = ImagePicker();
-    final pickedImg = await picker.pickImage(source: ImageSource.gallery);
+    XFile? picker = await ImagePicker().pickImage(source: ImageSource.gallery);
 
-    if (pickedImg == null) {
+    if (picker != null) {
+      selectedImage = File(picker.path);
+    } else {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text("Select a image")));
-    } else {
-      File file = File(pickedImg.path);
+      ).showSnackBar(SnackBar(content: Text("Nothing is selected")));
+    }
 
-      final storageRef = FirebaseStorage.instance.ref();
-      final childRef = storageRef.child(
-        "restaurant_items/$globalDocId${DateTime.now().millisecondsSinceEpoch}.jpg",
-      );
+    setState(() {});
+  }
 
-      await childRef.putFile(file).then((value) {
+  String? foodImageURL = "";
+
+  foodImagesURL() async {
+    final fileName = DateTime.now().millisecondsSinceEpoch.toString();
+    final storageRef = FirebaseStorage.instance.ref().child(
+      "restaurant_items/${globalDocId}/$fileName.jpg",
+    );
+
+    try {
+      if (selectedImage != null) {
+        await storageRef.putFile(selectedImage!);
+        final downloadURL = await storageRef.getDownloadURL();
+
+        foodImageURL = downloadURL;
+
+        print("Image uploaded: $downloadURL");
+      } else {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text("Image upload Successfully")));
-      });
-      final downloadURL = childRef.getDownloadURL();
-
-      itemsUrl = await downloadURL;
+        ).showSnackBar(SnackBar(content: Text("No image select")));
+      }
+    } catch (e) {
+      print("Upload error: $e");
     }
   }
 
@@ -211,8 +223,40 @@ class _HomePageState extends State<HomePage> {
               },
               child: Text("Select food image"),
             ),
+            SizedBox(
+              height: 85,
+              child:
+                  selectedImage == null
+                      ? Text("No image selected")
+                      : Stack(
+                        children: [
+                          Container(
+                            height: 200,
+                            width: 75,
+                            child: Image.file(
+                              selectedImage!,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          Positioned(
+                            top: 0,
+                            left: 32,
+                            child: IconButton(
+                              onPressed: () {
+                                selectedImage = null;
+
+                                setState(() {});
+                              },
+                              icon: Icon(Icons.close, size: 35),
+                              color: Colors.blue,
+                            ),
+                          ),
+                        ],
+                      ),
+            ),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
+                await foodImagesURL();
                 foodItemCreate(
                   foodName: foodName.text,
                   foodPrice: foodPrice.text,
@@ -221,6 +265,7 @@ class _HomePageState extends State<HomePage> {
                 foodPrice.clear();
 
                 dataGet.clear();
+                selectedImage = null;
                 getItems();
               },
               child: Text("Add Items"),

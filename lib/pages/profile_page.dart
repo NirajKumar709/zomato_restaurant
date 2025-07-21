@@ -35,77 +35,18 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   updateOwnerProfile({
-    required String ownerName,
     required String resName,
     required String address,
-    required String foodType,
-  }) {
+    required String phoneNumber,
+  }) async {
     FirebaseFirestore firestore = FirebaseFirestore.instance;
-    firestore.collection("restaurant").doc(globalDocId).update({
-      "ownerName": ownerName,
+    await firestore.collection("restaurant_profile").doc(globalDocId).update({
       "restaurantName": resName,
       "address": address,
-      "foodType": foodType,
+      "phoneNumber": phoneNumber,
     });
 
     getRestaurantUser();
-  }
-
-  String imageURLStore = "";
-
-  uploadImage() async {
-    // from image picker package
-    final ImagePicker picker = ImagePicker();
-    final img = await picker.pickImage(source: ImageSource.gallery);
-
-    if (img == null) {
-      Navigator.pop(context);
-    } else {
-      File file = File(img.path);
-
-      // from firebase Storage image
-      final storageRef = FirebaseStorage.instance.ref();
-      final imageRef = storageRef.child(
-        "restaurant/${DateTime.now().millisecondsSinceEpoch}.jpg",
-      );
-
-      try {
-        imageRef.putFile(file).then((p0) async {
-          final newImageURL = imageRef.getDownloadURL();
-
-          imageURLStore = await newImageURL;
-
-          Future.delayed(Duration(seconds: 1), () {
-            updateImage();
-          });
-        });
-      } catch (e) {
-        print(e);
-      }
-    }
-  }
-
-  updateImage() {
-    FirebaseFirestore firestore = FirebaseFirestore.instance;
-    firestore
-        .collection("restaurant")
-        .doc(globalDocId)
-        .update({"imageURL": imageURLStore})
-        .then((value) async {
-          getData();
-        });
-  }
-
-  getData() async {
-    FirebaseFirestore firestore = FirebaseFirestore.instance;
-    DocumentSnapshot snapshot =
-        await firestore.collection("restaurant").doc(globalDocId).get();
-
-    Map<String, dynamic> finalData = snapshot.data() as Map<String, dynamic>;
-
-    imageURL = finalData["imageURL"];
-
-    setState(() {});
   }
 
   @override
@@ -144,9 +85,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   shape: BoxShape.circle,
                                 ),
                                 child: InkWell(
-                                  onTap: () {
-                                    uploadImage();
-                                  },
+                                  onTap: () {},
                                   child: Icon(
                                     Icons.add,
                                     color: Colors.white,
@@ -170,13 +109,11 @@ class _ProfilePageState extends State<ProfilePage> {
                       showDialog(
                         context: context,
                         builder: (context) {
-                          TextEditingController nameEdit =
-                              TextEditingController();
-                          TextEditingController restaurantEdit =
+                          TextEditingController restaurantNameEdit =
                               TextEditingController();
                           TextEditingController addressEdit =
                               TextEditingController();
-                          TextEditingController foodEdit =
+                          TextEditingController phoneNumberEdit =
                               TextEditingController();
 
                           return AlertDialog(
@@ -184,13 +121,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               child: ListBody(
                                 children: [
                                   TextFormField(
-                                    controller: nameEdit,
-                                    decoration: InputDecoration(
-                                      hintText: "Owner Name",
-                                    ),
-                                  ),
-                                  TextFormField(
-                                    controller: restaurantEdit,
+                                    controller: restaurantNameEdit,
                                     decoration: InputDecoration(
                                       hintText: "Restaurant Name",
                                     ),
@@ -202,9 +133,10 @@ class _ProfilePageState extends State<ProfilePage> {
                                     ),
                                   ),
                                   TextFormField(
-                                    controller: foodEdit,
+                                    keyboardType: TextInputType.number,
+                                    controller: phoneNumberEdit,
                                     decoration: InputDecoration(
-                                      hintText: "Food Type",
+                                      hintText: "Phone",
                                     ),
                                   ),
                                 ],
@@ -214,10 +146,9 @@ class _ProfilePageState extends State<ProfilePage> {
                               TextButton(
                                 onPressed: () {
                                   updateOwnerProfile(
-                                    ownerName: nameEdit.text,
-                                    resName: restaurantEdit.text,
+                                    resName: restaurantNameEdit.text,
                                     address: addressEdit.text,
-                                    foodType: foodEdit.text,
+                                    phoneNumber: phoneNumberEdit.text,
                                   );
                                   dataStore.clear();
                                   Navigator.pop(context);
