@@ -334,6 +334,9 @@ class _HomePageState extends State<HomePage> {
                       : Center(child: CircularProgressIndicator());
                 },
               ),
+
+
+
               // Icon(Icons.person),
               onTap: () {
                 Navigator.push(
